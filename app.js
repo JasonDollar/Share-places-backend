@@ -3,11 +3,13 @@ const express = require('express')
 const mongoose = require('mongoose')
 
 const placeRouter = require('./routes/places-routes')
+const userRouter = require('./routes/user-routes')
 
 const app = express()
 app.use(express.json())
 
 app.use('/api/places', placeRouter)
+app.use('/api/users', userRouter)
 
 
 mongoose.connect(process.env.MONGO_URI, { 
