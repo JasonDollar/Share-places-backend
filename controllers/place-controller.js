@@ -7,3 +7,20 @@ exports.createPlace = async (req, res) => {
   await newPlace.save()
   res.json(newPlace)
 }
+
+exports.getPlaceById = async (req, res) => {
+  const placeId = req.params.pid
+
+  try {
+    const place = await Place.findById(placeId)
+
+    if (!place) {
+      return res.status(404).json({message: 'Could not find place for the provided id.'})
+    }
+
+    res.json({ place })
+
+  } catch (e) {
+    res.json({message: e.message})
+  }
+}
