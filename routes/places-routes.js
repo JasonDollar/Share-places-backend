@@ -8,6 +8,7 @@ router.get('/user/:uid', placeController.getPlacesByUserId)
 
 router.get('/:pid', placeController.getPlaceById)
 router.patch('/:pid', placeController.updatePlaceById)
+router.delete('/:pid', placeController.deletePlace)
 
 
 router.post('/', placeController.createPlace)

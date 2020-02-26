@@ -46,6 +46,20 @@ exports.updatePlaceById = async (req, res, next) => {
 
 }
 
+exports.deletePlace = async (req, res, next) => {
+  const placeId = req.params.pid
+  try {
+    const place = await Place.findByIdAndRemove(placeId)
+
+    if (!place) return next(new HttpError('Could not find the place', 404))
+
+
+    res.status(204).json({ place })
+  } catch (e) {
+    next(new HttpError(e.message, 500))
+  }
+}
+
 exports.getPlacesByUserId = async (req, res, next) => {
   try {
 
