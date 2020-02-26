@@ -3,11 +3,11 @@ const placeController = require('../controllers/place-controller')
 
 const router = express.Router()
 
-router.get('/', (req, res) => {
-  res.json({message: 'It works'})
-})
+
+router.get('/user/:uid', placeController.getPlacesByUserId)
 
 router.get('/:pid', placeController.getPlaceById)
+
 
 router.post('/', placeController.createPlace)
 
