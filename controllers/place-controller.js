@@ -6,7 +6,7 @@ exports.createPlace = async (req, res) => {
 
   const newPlace = new Place({title, description, address, creator, location, image})
   await newPlace.save()
-  res.status(201).json(newPlace)
+  res.status(201).json({ place: newPlace })
 }
 
 exports.getPlaceById = async (req, res, next) => {
@@ -26,6 +26,26 @@ exports.getPlaceById = async (req, res, next) => {
   }
 }
 
+exports.updatePlaceById = async (req, res, next) => {
+  const placeId = req.params.pid
+  const { title, description } = req.body
+  try {
+    const place = await Place.findById(placeId)
+
+    if (!place) return next(new HttpError('Could not find the place', 404))
+
+    if (title) place.title = title
+    if (description) place.description = description
+
+    await place.save()
+
+    res.status(200).json({ place })
+  } catch (e) {
+    next(new HttpError(e.message, 500))
+  }
+
+}
+
 exports.getPlacesByUserId = async (req, res, next) => {
   try {
 
@@ -36,7 +56,7 @@ exports.getPlacesByUserId = async (req, res, next) => {
       return next(new HttpError('Could not find places for that user.', 404))
     }
 
-    res.status(200).json(places)
+    res.status(200).json({ places })
 
   } catch (e) {
     res.json({ message: e.message })

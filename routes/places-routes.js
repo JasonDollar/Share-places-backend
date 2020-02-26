@@ -7,6 +7,7 @@ const router = express.Router()
 router.get('/user/:uid', placeController.getPlacesByUserId)
 
 router.get('/:pid', placeController.getPlaceById)
+router.patch('/:pid', placeController.updatePlaceById)
 
 
 router.post('/', placeController.createPlace)
