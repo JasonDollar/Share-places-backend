@@ -6,7 +6,7 @@ exports.createPlace = async (req, res) => {
 
   const newPlace = new Place({title, description, address, creator, location, image})
   await newPlace.save()
-  res.json(newPlace)
+  res.status(201).json(newPlace)
 }
 
 exports.getPlaceById = async (req, res, next) => {
