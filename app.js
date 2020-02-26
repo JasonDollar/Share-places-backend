@@ -11,6 +11,14 @@ app.use(express.json())
 app.use('/api/places', placeRouter)
 app.use('/api/users', userRouter)
 
+app.use((error, req, res, next) => {
+  if (req.headersSent) {
+    return next(error)
+  }
+  res.status(error.code || 500)
+    .json({ message: error.message || 'An unknown error occured' })
+})
+
 
 mongoose.connect(process.env.MONGO_URI, { 
   useNewUrlParser: true, useCreateIndex: true, useFindAndModify: false, useUnifiedTopology: true
