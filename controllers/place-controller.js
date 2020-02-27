@@ -110,13 +110,40 @@ exports.updatePlaceById = async (req, res, next) => {
 
 exports.deletePlace = async (req, res, next) => {
   const placeId = req.params.pid
+
+  let place
   try {
-    const place = await Place.findByIdAndRemove(placeId)
+    place = await Place.findById(placeId).populate('creator')
+  } catch (err) {
+    const error = new HttpError(
+      'Something went wrong, could not delete place.',
+      500,
+    )
+    return next(error)
+  }
 
-    
-    if (!place) return next(new HttpError('Could not find the place', 404))
+  if (!place) {
+    const error = new HttpError('Could not find place for this id.', 404)
+    return next(error)
+  }
 
-    res.status(204).json({ message: 'Place deleted succesfully' })
+  if (place.creator.id !== req.userData.userId) {
+    const error = new HttpError(
+      'You are not allowed to delete this place.',
+      401,
+    )
+    return next(error)
+  }
+
+
+  try {
+    const sess = await mongoose.startSession()
+    sess.startTransaction()
+    await place.remove({ session: sess })
+    place.creator.places.pull(place)
+    await place.creator.save({ session: sess })
+    await sess.commitTransaction()
+    res.status(204).json({ message: 'Deleted place.' })
   } catch (e) {
     next(new HttpError(e.message, 500))
   }
