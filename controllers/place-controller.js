@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator')
 const Place = require('../models/Place')
 const HttpError = require('../models/http-error')
+const getCoordsForAddress = require('../util/location')
 
 exports.createPlace = async (req, res, next) => {
   const errors = validationResult(req)
@@ -10,8 +11,15 @@ exports.createPlace = async (req, res, next) => {
   }
 
   const {
-    title, description, address, creator, location, image, 
+    title, description, address, creator, image, 
   } = req.body
+  
+  let location
+  try {
+    location = await getCoordsForAddress(address)
+  } catch (e) {
+    return next(e)
+  }
 
   const newPlace = new Place({ 
     title, description, address, creator, location, image, 
