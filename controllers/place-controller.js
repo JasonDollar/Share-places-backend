@@ -1,5 +1,7 @@
+const mongoose = require('mongoose')
 const { validationResult } = require('express-validator')
 const Place = require('../models/Place')
+const User = require('../models/User')
 const HttpError = require('../models/http-error')
 const getCoordsForAddress = require('../util/location')
 
@@ -11,7 +13,7 @@ exports.createPlace = async (req, res, next) => {
   }
 
   const {
-    title, description, address, creator, image, 
+    title, description, address, image, 
   } = req.body
   
   let location
@@ -22,11 +24,37 @@ exports.createPlace = async (req, res, next) => {
   }
 
   const newPlace = new Place({ 
-    title, description, address, creator, location, image, 
+    title, 
+    description,
+    address, 
+    creator: req.userData.userId,
+    location,
+    image, 
   })
+
+  let user
+  try {
+    user = await User.findById(req.userData.userId)
+  } catch (err) {
+    const error = new HttpError(
+      'Creating place failed, please try again.',
+      500,
+    )
+    return next(error)
+  }
+
+  if (!user) {
+    const error = new HttpError('Could not find user for provided id.', 404)
+    return next(error)
+  }
   
   try {
-    await newPlace.save()
+    const sess = await mongoose.startSession()
+    sess.startTransaction()
+    await newPlace.save({ session: sess })
+    user.places.push(newPlace)
+    await user.save({ session: sess })
+    await sess.commitTransaction()
   } catch (e) {
     return next(new HttpError(e.message, 500))
   }
@@ -95,8 +123,6 @@ exports.deletePlace = async (req, res, next) => {
 }
 
 exports.getPlacesByUserId = async (req, res, next) => {
-  // try {
-
   const userId = req.params.uid
   let places
   try {
@@ -111,8 +137,4 @@ exports.getPlacesByUserId = async (req, res, next) => {
   }
 
   res.status(200).json({ places: places.map(item => item.toObject({ getters: true })) })
-
-  // } catch (e) {
-  // res.json({ message: e.message })
-  // }
 }

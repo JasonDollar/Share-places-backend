@@ -48,7 +48,7 @@ exports.createUser = async (req, res, next) => {
     token = jwt.sign(
       { userId: newUser.id, email: newUser.email },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' },
+      { expiresIn: '1day' },
     )
   } catch (e) {
     const error = new HttpError(
@@ -113,7 +113,7 @@ exports.loginUser = async (req, res, next) => {
     token = jwt.sign(
       { userId: existingUser.id, email: existingUser.email },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' },
+      { expiresIn: '1day' },
     )
   } catch (err) {
     const error = new HttpError(
