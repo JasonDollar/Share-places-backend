@@ -1,7 +1,14 @@
+const { validationResult } = require('express-validator')
 const Place = require('../models/Place')
 const HttpError = require('../models/http-error')
 
-exports.createPlace = async (req, res) => {
+exports.createPlace = async (req, res, next) => {
+  const errors = validationResult(req)
+
+  if (!errors.isEmpty()) {
+    return next(new HttpError('Invalid inputs passed, please check your data.', 422))
+  }
+
   const {
     title, description, address, creator, location, image, 
   } = req.body
@@ -9,7 +16,12 @@ exports.createPlace = async (req, res) => {
   const newPlace = new Place({ 
     title, description, address, creator, location, image, 
   })
-  await newPlace.save()
+  
+  try {
+    await newPlace.save()
+  } catch (e) {
+    return next(new HttpError(e.message, 500))
+  }
   res.status(201).json({ place: newPlace })
 }
 
@@ -31,6 +43,11 @@ exports.getPlaceById = async (req, res, next) => {
 }
 
 exports.updatePlaceById = async (req, res, next) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return next(new HttpError('Invalid inputs passed, please check your data.', 422))
+  }
+  
   const placeId = req.params.pid
   const { title, description } = req.body
   try {
