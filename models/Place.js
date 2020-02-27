@@ -2,28 +2,28 @@ const { Schema, model, Types } = require('mongoose')
 
 const placeSchema = new Schema({
   title: {
-    type: String, required: true
+    type: String, required: true,
   },
   description: {
-    type: String, required: true
+    type: String, required: true,
   },
   image: {
-    type: String, required: true
+    type: String, required: true,
   },
   address: {
-    type: String, required: true
+    type: String, required: true,
   },
   location: {
     lat: {
-      type: Number, required: true
+      type: Number, required: true,
     },
     lng: {
       type: Number, required: true,
-    }
+    },
   },
   creator: {
-    type: Types.ObjectId, required: true, ref: 'User'
-  }
+    type: Types.ObjectId, required: true, ref: 'User',
+  },
 })
 
 const Place = model('Place', placeSchema)

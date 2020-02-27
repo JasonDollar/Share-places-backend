@@ -1,6 +1,6 @@
-const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const User = require('../models/User')
 const HttpError = require('../models/http-error')
 
 exports.createUser = async (req, res, next) => {
@@ -15,7 +15,7 @@ exports.createUser = async (req, res, next) => {
   } catch (e) {
     const error = new HttpError(
       e.message,
-      500
+      500,
     )
     return next(error)
   }
@@ -26,17 +26,17 @@ exports.createUser = async (req, res, next) => {
     token = jwt.sign(
       { userId: newUser.id, email: newUser.email },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '1h' },
     )
   } catch (e) {
     const error = new HttpError(
       'Signing up failed, please try again later.',
-      500
+      500,
     )
     return next(error)
   }
   
-  res.status(201).json({ userId: newUser.id, email: newUser.email, token: token })
+  res.status(201).json({ userId: newUser.id, email: newUser.email, token })
 
 }
 
@@ -46,11 +46,11 @@ exports.loginUser = async (req, res, next) => {
   let existingUser
 
   try {
-    existingUser = await User.findOne({ email: email })
+    existingUser = await User.findOne({ email })
   } catch (err) {
     const error = new HttpError(
       'Logging in failed, please try again later.',
-      500
+      500,
     )
     return next(error)
   }
@@ -58,7 +58,7 @@ exports.loginUser = async (req, res, next) => {
   if (!existingUser) {
     const error = new HttpError(
       'Invalid credentials, could not log you in.',
-      403
+      403,
     )
     return next(error)
   }
@@ -69,7 +69,7 @@ exports.loginUser = async (req, res, next) => {
   } catch (err) {
     const error = new HttpError(
       'Could not log you in, please check your credentials and try again.',
-      500
+      500,
     )
     return next(error)
   }
@@ -77,7 +77,7 @@ exports.loginUser = async (req, res, next) => {
   if (!isValidPassword) {
     const error = new HttpError(
       'Invalid credentials, could not log you in.',
-      403
+      403,
     )
     return next(error)
   }
@@ -87,12 +87,12 @@ exports.loginUser = async (req, res, next) => {
     token = jwt.sign(
       { userId: existingUser.id, email: existingUser.email },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '1h' },
     )
   } catch (err) {
     const error = new HttpError(
       'Logging in failed, please try again later.',
-      500
+      500,
     )
     return next(error)
   }
@@ -100,7 +100,7 @@ exports.loginUser = async (req, res, next) => {
   res.json({
     userId: existingUser.id,
     email: existingUser.email,
-    token: token
+    token,
   })
 }
 
