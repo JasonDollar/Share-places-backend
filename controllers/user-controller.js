@@ -12,9 +12,25 @@ exports.createUser = async (req, res, next) => {
   
   const { name, email, password } = req.body
 
+  let existingUser
+  try {
+    existingUser = await User.findOne({ email })
+
+  } catch {
+    const error = new HttpError('Signing up failed, please try again later', 500)
+    return next(error)
+  }
+
+  if (existingUser) {
+    const error = new HttpError('User exists lready, please log in insted', 422)
+    return next(error)
+  }
+
   const hashedPassword = await bcrypt.hash(password, 12)
 
-  const newUser = new User({ name, email, password: hashedPassword })
+  const newUser = new User({
+    name, email, password: hashedPassword, places: [], 
+  })
 
   try {
     await newUser.save()
@@ -42,7 +58,11 @@ exports.createUser = async (req, res, next) => {
     return next(error)
   }
   
-  res.status(201).json({ userId: newUser.id, email: newUser.email, token })
+  res.status(201).json({
+    userId: newUser.id, 
+    email: newUser.email,
+    token, 
+  })
 
 }
 
@@ -110,7 +130,17 @@ exports.loginUser = async (req, res, next) => {
   })
 }
 
-// TODO
 exports.getUsers = async (req, res, next) => {
-
+  let users
+  try {
+    users = await User.find({}, '-password')
+  
+  } catch {
+    const error = new HttpError(
+      'Fetching users failed, please try again later.',
+      500,
+    )
+    return next(error)
+  }
+  res.json(users.map(item => item.toObject({ getters: true })))
 }
