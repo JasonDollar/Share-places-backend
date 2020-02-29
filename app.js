@@ -1,12 +1,21 @@
 require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
+const cors = require('cors')
 
 const placeRouter = require('./routes/places-routes')
 const userRouter = require('./routes/user-routes')
 const HttpError = require('./models/http-error')
 
+
 const app = express()
+
+const dev = process.env.NODE_ENV !== 'production'
+app.use(cors({
+  origin: dev ? 'http://localhost:3000' : process.env.PRODUCTION_URL,
+  credentials: true,
+}))
+
 app.use(express.json())
 
 app.use('/api/places', placeRouter)
